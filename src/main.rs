@@ -5,8 +5,8 @@ use rand::Rng;
 struct Scanner {
     source: Box<dyn Iterator<Item = i32>>,
     window: VecDeque<i32>,
-    sort_inds: VecDeque<usize>,
-    longest_streak: usize,
+    _sort_inds: VecDeque<usize>,
+    best_len: usize,
     best_final_day: usize,
     max: i32,
     min: i32,
@@ -16,12 +16,10 @@ struct Scanner {
 
 impl Display for Scanner {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // todo!()
-        // write!(f, "display not yet implmented for Scanner")
-        writeln!(f, "window: {:?}", self.window)?;
-        writeln!(f, "sort_inds: {:?}", self.sort_inds)?;
-        writeln!(f, "longest_streak: {:?}", self.longest_streak)?;
-        write!(f, "best_final_day: {:?}", self.best_final_day)
+        writeln!(f, "Scanner: ")?;
+        writeln!(f, "\twindow: {:?}", self.window)?;
+        writeln!(f, "\tlongest_streak: {:?}", self.best_len)?;
+        write!(f, "\tbest_final_day: {:?}", self.best_final_day)
     }
 }
 
@@ -33,8 +31,8 @@ impl Scanner {
         Self {
             source,
             window: [day0].into(),
-            sort_inds: [0].into(),
-            longest_streak: 1,
+            _sort_inds: [0].into(),
+            best_len: 1,
             best_final_day: 0,
             max: day0,
             min: day0,
@@ -59,9 +57,9 @@ impl Scanner {
             self.shrink();
             return Some(next_day);
         }
-        if self.window.len() > self.longest_streak {
+        if self.window.len() > self.best_len {
             self.best_final_day = self.current_day;
-            self.longest_streak = self.window.len();
+            self.best_len = self.window.len();
         }
         Some(next_day)
     }
@@ -91,7 +89,7 @@ impl Scanner {
     }
     fn best_range(&self) -> (usize, usize) {
         (
-            1 + self.best_final_day - self.longest_streak,
+            1 + self.best_final_day - self.best_len,
             self.best_final_day + 1,
         )
     }
@@ -99,15 +97,16 @@ impl Scanner {
 
 fn main() {
     let mut rng = rand::thread_rng();
-    let temps: Vec<i32> = (0..50).map(|_| rng.gen_range(0..12)).collect();
-    println!("temps: {:#?}", temps);
+    let temps: Vec<i32> = (0..50).map(|_| rng.gen_range(0..20)).collect();
+    // println!("temps: {:#?}", temps);
     let source = temps.clone().into_iter();
     let mut scanner = Scanner::new(Box::new(source));
     println!("{}\n", scanner);
-    while let Some(_) = scanner.step() {
-        println!("{}\n", scanner);
+    while let Some(_current_temp) = scanner.step() {
+        // println!("{}\n", scanner);
     }
     let (start, end) = scanner.best_range();
+    println!("{}", scanner);
     println!("best range: {}..{}", start, end);
     println!("best temps: {:?}", &temps[start..end])
 }
