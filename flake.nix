@@ -25,6 +25,7 @@
         buildInputs = with pkgs; [
           py
           rust
+          rust-analyzer
         ];
       };
     });
