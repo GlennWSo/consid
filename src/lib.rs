@@ -1,8 +1,10 @@
+pub mod v2;
+
 use std::time::{Duration, Instant};
 use std::{collections::VecDeque, fmt::Display};
 
 pub trait Scanner {
-    fn new(source: Box<dyn Iterator<Item = i32>>) -> Self;
+    fn new(source: Box<dyn Iterator<Item = i32>>, tolerance: i32) -> Self;
     fn best_range(&self) -> (usize, usize);
     fn step(&mut self) -> Option<i32>;
     fn seek(&mut self) {
@@ -61,18 +63,18 @@ impl OldScanner {
 }
 
 impl Scanner for OldScanner {
-    fn new(mut source: Box<dyn Iterator<Item = i32>>) -> Self {
+    fn new(mut source: Box<dyn Iterator<Item = i32>>, tolerance: i32) -> Self {
         let day0 = source
             .next()
             .expect("the source should have atleast one day");
         Self {
             source,
+            tolerance,
             window: [day0].into(),
             best_len: 1,
             best_final_day: 0,
             max: day0,
             min: day0,
-            tolerance: 5,
             current_day: 0,
         }
     }
