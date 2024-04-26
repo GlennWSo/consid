@@ -1,24 +1,9 @@
-pub mod v2;
-pub mod v3;
-
 use std::time::{Duration, Instant};
 use std::{collections::VecDeque, fmt::Display};
 
-pub trait Scanner {
-    fn new(source: Box<dyn Iterator<Item = i32>>, tolerance: i32) -> Self;
-    fn best_range(&self) -> (usize, usize);
-    fn step(&mut self) -> Option<i32>;
-    fn seek(&mut self) {
-        while let Some(_current_temp) = self.step() {}
-    }
-    fn time_me(&mut self) -> Duration {
-        let start = Instant::now();
-        self.seek();
-        start.elapsed()
-    }
-}
+use crate::Scanner;
 
-pub struct OldScanner {
+pub struct Scanner3 {
     source: Box<dyn Iterator<Item = i32>>,
     window: VecDeque<i32>,
     best_len: usize,
@@ -29,7 +14,7 @@ pub struct OldScanner {
     current_day: usize,
 }
 
-impl Display for OldScanner {
+impl Display for Scanner3 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Scanner: ")?;
         writeln!(f, "\twindow: {:?}", self.window)?;
@@ -38,32 +23,50 @@ impl Display for OldScanner {
     }
 }
 
-impl OldScanner {
+impl Scanner3 {
     fn outside_tol(&mut self) -> bool {
         (self.max - self.min) > self.tolerance
     }
-    fn shrink(&mut self) {
-        loop {
-            let dropped = self
-                .window
-                .pop_front()
-                .expect("shrink should stop before window is empty");
-            if dropped == self.min {
-                self.min = *self.window.iter().min().expect("not empty");
-                if !self.outside_tol() {
-                    return;
-                }
-            } else if dropped == self.max {
-                self.max = *self.window.iter().max().expect("not empty");
-                if !self.outside_tol() {
-                    return;
-                }
+    fn reduce_min(&mut self) {
+        let perfect_min = self.max - self.tolerance;
+        let mut min_iter = self.window.iter().copied().enumerate().rev();
+
+        let mut index: usize;
+        (index, self.min) = min_iter
+            .next()
+            .expect("should have atleast 2 values if we need to shrink");
+        for (i, v) in min_iter {
+            index = i;
+            if v < perfect_min {
+                break;
+            }
+            if v < self.min {
+                self.min = v;
             }
         }
+        self.window.drain(0..=index);
+    }
+    fn remove_max(&mut self) {
+        let perfect_max = self.tolerance + self.min;
+
+        let max_iter = self.window.iter().copied().enumerate().rev();
+
+        let mut index: usize = 0;
+
+        for (i, v) in max_iter {
+            index = i;
+            if v > perfect_max {
+                break;
+            }
+            if v > self.max {
+                self.max = v;
+            }
+        }
+        self.window.drain(0..=index);
     }
 }
 
-impl Scanner for OldScanner {
+impl Scanner for Scanner3 {
     fn new(mut source: Box<dyn Iterator<Item = i32>>, tolerance: i32) -> Self {
         let day0 = source
             .next()
@@ -84,17 +87,22 @@ impl Scanner for OldScanner {
         let current_temp = self.source.next()?;
         self.window.push_back(current_temp);
         self.current_day += 1;
-        let mut outside = false;
 
         if current_temp > self.max {
             self.max = current_temp;
-            outside = self.outside_tol();
+            if self.outside_tol() {
+                println!("need heating: {:?}", self.window);
+                self.reduce_min();
+                println!("warmer: {:?}", self.window);
+            };
+            return Some(current_temp);
         } else if current_temp < self.min {
             self.min = current_temp;
-            outside = self.outside_tol();
-        }
-        if outside {
-            self.shrink();
+            if self.outside_tol() {
+                println!("need cooling: {:?}", self.window);
+                self.remove_max();
+                println!("colder: {:?}", self.window);
+            };
             return Some(current_temp);
         }
         if self.window.len() > self.best_len {
