@@ -2,6 +2,10 @@ use std::{collections::VecDeque, fmt::Display};
 
 use crate::Scanner;
 
+/// this Scanner tries to remeber where 2 extrema are in the moving window
+/// To point of this is to speed up shrinking
+/// but for most cenerios the cost of finding extra does not payoff, unless
+/// tolerance and distrubtions of days are set up so that very long streaks/windows sizes occur
 pub struct Scanner2 {
     source: Box<dyn Iterator<Item = i32>>,
     window: VecDeque<i32>,

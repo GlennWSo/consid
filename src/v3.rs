@@ -3,6 +3,10 @@ use std::{collections::VecDeque, fmt::Display};
 
 use crate::Scanner;
 
+/// when shrinking is needed instead of checking how many too drop
+/// check how many can be kept.
+/// inital permance testing shows the wether this implementation is more performent then OldScanner
+/// depends on the distrubion range and tolerance within a streak
 pub struct Scanner3 {
     source: Box<dyn Iterator<Item = i32>>,
     window: VecDeque<i32>,
@@ -27,11 +31,12 @@ impl Scanner3 {
     fn outside_tol(&mut self) -> bool {
         (self.max - self.min) > self.tolerance
     }
-    fn reduce_min(&mut self) {
+    fn remove_min(&mut self) {
         let perfect_min = self.max - self.tolerance;
         let mut min_iter = self.window.iter().copied().enumerate().rev();
 
         let mut index: usize;
+        self.min = i32::MAX;
         (index, self.min) = min_iter
             .next()
             .expect("should have atleast 2 values if we need to shrink");
@@ -48,11 +53,10 @@ impl Scanner3 {
     }
     fn remove_max(&mut self) {
         let perfect_max = self.tolerance + self.min;
-
         let max_iter = self.window.iter().copied().enumerate().rev();
-
         let mut index: usize = 0;
 
+        self.max = i32::MIN;
         for (i, v) in max_iter {
             index = i;
             if v > perfect_max {
@@ -88,22 +92,23 @@ impl Scanner for Scanner3 {
         self.window.push_back(current_temp);
         self.current_day += 1;
 
+        // println!("{}", self);
         if current_temp > self.max {
             self.max = current_temp;
             if self.outside_tol() {
-                println!("need heating: {:?}", self.window);
-                self.reduce_min();
-                println!("warmer: {:?}", self.window);
+                // println!("pre remove_min min:{} w:{:?}", self.min, self.window);
+                self.remove_min();
+                // println!("warmer min: {} w: {:?}", self.min, self.window);
+                return Some(current_temp);
             };
-            return Some(current_temp);
         } else if current_temp < self.min {
             self.min = current_temp;
             if self.outside_tol() {
-                println!("need cooling: {:?}", self.window);
+                // println!("pre max: {} remove_max: {:?}", self.max, self.window);
                 self.remove_max();
-                println!("colder: {:?}", self.window);
+                // println!("max: {}, colder: {:?}", self.max, self.window);
+                return Some(current_temp);
             };
-            return Some(current_temp);
         }
         if self.window.len() > self.best_len {
             self.best_final_day = self.current_day;
