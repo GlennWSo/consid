@@ -3,14 +3,14 @@ use rand::prelude::*;
 #[allow(unused)]
 use rand_chacha::ChaCha8Rng;
 
-use consid::{v3::Scanner3 as NewScanner, OldScanner, Scanner};
+use consid::{v4::Scanner4 as NewScanner, OldScanner, Scanner};
 
 fn main() {
     // let mut rng = ChaCha8Rng::seed_from_u64(11);
     let mut rng = thread_rng();
-    let temps: Vec<i32> = (0..4000000).map(|_| rng.gen_range(-20..20)).collect();
+    let temps: Vec<i32> = (0..10_u32.pow(7)).map(|_| rng.gen_range(-10..10)).collect();
     let source = temps.clone().into_iter();
-    let tolerance = 30;
+    let tolerance = 5;
     let mut new_scanner = NewScanner::new(Box::new(source.clone()), tolerance);
     let time = new_scanner.time_me();
     let (start, end) = new_scanner.best_range();
