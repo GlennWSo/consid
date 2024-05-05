@@ -29,9 +29,20 @@
 
       rust = pkgs.rust-bin.stable.latest.default;
       craneLib = crane.mkLib pkgs;
+      src = craneLib.cleanCargoSource (craneLib.path ./.);
+      cargoArtifacts = craneLib.buildDepsOnly {
+        inherit src;
+      };
+      crate = craneLib.buildPackage {
+        inherit src cargoArtifacts;
+      };
     in {
-      packages.default = craneLib.buildPackage {
-        src = craneLib.cleanCargoSource (craneLib.path ./.);
+      checks = {
+        inherit crate;
+      };
+      packages.default = crate;
+      packages.docs = craneLib.cargoDoc {
+        inherit src cargoArtifacts;
       };
       devShells.default = pkgs.mkShell {
         buildInputs = with pkgs; [
