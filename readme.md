@@ -11,6 +11,7 @@
 oneshoot: 
 > nix run github:GlennWSo/consid -- --help
 
+```output
 finds largest sequence of numbers within a tolerance from a random source
 
 Usage: consid [OPTIONS] -t <TOL> --lb <LB> --width <WIDTH>
@@ -24,4 +25,4 @@ Options:
   -p, --print-rng      prints debug information
   -h, --help           Print help
   -V, --version        Print version
-
+```
