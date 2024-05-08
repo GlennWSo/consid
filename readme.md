@@ -9,14 +9,15 @@
 ## usage
 
 oneshoot: 
-> nix run github:GlennWSo/consid -- --help
+```shell
+nix run github:GlennWSo/consid -- --help
+```
 
-```output
-finds largest sequence of numbers within a tolerance from a random source
-
-Usage: consid [OPTIONS] -t <TOL> --lb <LB> --width <WIDTH>
-
-Options:
+>finds largest sequence of numbers within a tolerance from a random source
+>
+>Usage: consid [OPTIONS] -t <TOL> --lb <LB> --width <WIDTH>
+>
+>Options:
   -t <TOL>             tolerance of minmax differance in window scan
   -l, --lb <LB>        low bound for rng numbers
   -w, --width <WIDTH>  rng span(high bound - low bound)
@@ -25,4 +26,3 @@ Options:
   -p, --print-rng      prints debug information
   -h, --help           Print help
   -V, --version        Print version
-```
