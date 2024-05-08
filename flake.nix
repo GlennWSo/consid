@@ -51,6 +51,7 @@
       };
       devShells.default = craneLib.devShell {
         inputsFrom = [crate];
+        packages = [pkgs.rust-analyzer];
       };
     });
 }
