@@ -20,15 +20,21 @@
     crane,
     ...
   }:
-    flake-utils.lib.eachDefaultSystem (system: let
+    flake-utils.lib.eachDefaultSystem (localSystem: let
       overlays = [(import rust-overlay)];
-      pkgs = import nixpkgs {
-        inherit system overlays;
+      crossSystem = "aarch64-linux";
+      pkgs = import nixpkgs {inherit overlays localSystem;};
+      crossPkgs = import nixpkgs {
+        inherit localSystem crossSystem overlays;
       };
       py = pkgs.python312.withPackages (p: [p.numpy]);
 
-      rust = pkgs.rust-bin.stable.latest.default;
-      craneLib = crane.mkLib pkgs;
+      rust = crossPkgs.rust-bin.stable.latest.default.override {
+        targets = [
+          "aarch64-unknown-linux-gnu"
+        ];
+      };
+      craneLib = (crane.mkLib pkgs).overrideToolchain rust;
       src = craneLib.cleanCargoSource (craneLib.path ./.);
       cargoArtifacts = craneLib.buildDepsOnly {
         inherit src;
@@ -40,9 +46,12 @@
       checks = {
         inherit crate;
       };
-      packages.default = crate;
-      packages.docs = craneLib.cargoDoc {
-        inherit src cargoArtifacts;
+      packages = {
+        default = crate;
+        docs = craneLib.cargoDoc {
+          inherit src cargoArtifacts;
+        };
+        cross = pkgs.callPackage ./default.nix {inherit craneLib;};
       };
       devShells.default = pkgs.mkShell {
         buildInputs = with pkgs; [
