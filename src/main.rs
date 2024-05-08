@@ -1,12 +1,9 @@
-use std::thread::sleep;
-use std::time::Duration;
-
-use rand::distributions::{DistIter, Uniform};
-use rand::{distributions::Standard, prelude::*};
+use rand::distributions::Uniform;
+use rand::prelude::*;
 
 use rand_chacha::ChaCha8Rng;
 
-use consid::{v4::Scanner4 as NewScanner, OldScanner, Scanner};
+use consid::{v4::Scanner4 as NewScanner, Scanner};
 
 fn main() {
     // data spec

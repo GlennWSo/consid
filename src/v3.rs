@@ -1,4 +1,4 @@
-use std::time::{Duration, Instant};
+
 use std::{collections::VecDeque, fmt::Display};
 
 use crate::Scanner;
