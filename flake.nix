@@ -27,7 +27,6 @@
       crossPkgs = import nixpkgs {
         inherit localSystem crossSystem overlays;
       };
-      py = pkgs.python312.withPackages (p: [p.numpy]);
 
       rust = crossPkgs.rust-bin.stable.latest.default.override {
         targets = [
@@ -43,9 +42,6 @@
         inherit src cargoArtifacts;
       };
     in {
-      checks = {
-        inherit crate;
-      };
       packages = {
         default = crate;
         docs = craneLib.cargoDoc {
@@ -53,12 +49,8 @@
         };
         cross = pkgs.callPackage ./default.nix {inherit craneLib;};
       };
-      devShells.default = pkgs.mkShell {
-        buildInputs = with pkgs; [
-          py
-          rust
-          rust-analyzer
-        ];
+      devShells.default = craneLib.devShell {
+        inputsFrom = [crate];
       };
     });
 }
