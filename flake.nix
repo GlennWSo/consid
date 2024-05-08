@@ -28,11 +28,7 @@
         inherit localSystem crossSystem overlays;
       };
 
-      rust = crossPkgs.rust-bin.stable.latest.default.override {
-        targets = [
-          "aarch64-unknown-linux-gnu"
-        ];
-      };
+      rust = pkgs.rust-bin.stable.latest.default;
       craneLib = (crane.mkLib pkgs).overrideToolchain rust;
       src = craneLib.cleanCargoSource (craneLib.path ./.);
       cargoArtifacts = craneLib.buildDepsOnly {
@@ -42,17 +38,26 @@
         inherit src cargoArtifacts;
       };
     in {
+      devShells.default = craneLib.devShell {
+        inputsFrom = [crate];
+        packages = [pkgs.rust-analyzer];
+      };
       packages = {
         default = crate;
         consid = crate;
         docs = craneLib.cargoDoc {
           inherit src cargoArtifacts;
         };
-        cross = pkgs.callPackage ./default.nix {inherit craneLib;};
-      };
-      devShells.default = craneLib.devShell {
-        inputsFrom = [crate];
-        packages = [pkgs.rust-analyzer];
+        cross.aarch64-linux.consid = let
+          rust = crossPkgs.rust-bin.stable.latest.default.override {
+            targets = [
+              "aarch64-unknown-linux-gnu"
+            ];
+          };
+          craneLib = (crane.mkLib pkgs).overrideToolchain rust;
+        in
+          pkgs.callPackage ./default.nix
+          {inherit craneLib;};
       };
     });
 }
