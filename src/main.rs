@@ -13,18 +13,10 @@ use clap::Parser;
     long_about
 )]
 struct Args {
-    #[arg(short, long)]
-    seed: Option<u64>,
+    #[arg(short, help = "tolerance of minmax differance in window scan")]
+    tol: i32,
 
-    #[arg(
-        short,
-        long,
-        default_value_t = false,
-        help = "prints debug information"
-    )]
-    print_rng: bool,
-
-    #[arg(long, help = "low bound for rng numbers")]
+    #[arg(short, long, help = "low bound for rng numbers")]
     lb: i32,
 
     #[arg(short, long, help = "rng span(high bound - low bound)")]
@@ -38,12 +30,16 @@ struct Args {
     )]
     count: usize,
 
+    #[arg(short, long)]
+    seed: Option<u64>,
+
     #[arg(
         short,
-        default_value_t = 5,
-        help = "tolerance of minmax differance in window scan"
+        long,
+        default_value_t = false,
+        help = "prints debug information"
     )]
-    tol: i32,
+    print_rng: bool,
 }
 
 impl Args {

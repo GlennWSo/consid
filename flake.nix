@@ -44,6 +44,7 @@
     in {
       packages = {
         default = crate;
+        consid = crate;
         docs = craneLib.cargoDoc {
           inherit src cargoArtifacts;
         };
