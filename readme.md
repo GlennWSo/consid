@@ -4,7 +4,7 @@
  I have only tested on a x86 linux system
 
 ## demo
-[![asciicast](https://asciinema.org/a/jPdjzsPJYLeDgaNEUpiQc5Gvl.svg)](https://asciinema.org/a/jPdjzsPJYLeDgaNEUpiQc5Gvl)
+[![asciicast](https://asciinema.org/a/wImKjqJXhhcMKxgtlKaiVLcoC.svg)](https://asciinema.org/a/wImKjqJXhhcMKxgtlKaiVLcoC)
 
 ## usage
 
